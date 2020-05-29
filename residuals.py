@@ -3,10 +3,20 @@ import imageio
 import glob
 import os
 import numpy as np
+import sys
 
-def calc(ref_path, image_path):
-    residuals, our_frames, ref_frames = [], [], []
-    for curr_path in glob.glob(image_path + '/*.png'):
+def calc(ref_path, image_path, which):
+    paths = list(glob.glob(image_path + '/*.png'))
+    file_name = os.path.basename(paths[0])
+    frame = imageio.imread(image_path + '/' + file_name)
+    shape = frame.shape
+
+    result = np.empty((len(paths), shape[2], shape[0], shape[1]), dtype=np.float32)
+    
+    for i, curr_path in enumerate(paths):
+        if i % 100 == 0:
+            print('Saving', which, 'image', i)
+            
         file_name = os.path.basename(curr_path)
 
         ours = imageio.imread(image_path + '/' + file_name)
@@ -23,10 +33,29 @@ def calc(ref_path, image_path):
         ours = ours.astype(np.float32) / 255.
         ref = ref.astype(np.float32) / 255.
 
-        our_frames.append(ours)
-        ref_frames.append(ref)
-        residuals.append(ours - ref)
+        if which == 'reference':
+            result[i] = ref
+        elif which == 'compressed':
+            result[i] = ours
+        elif which == 'residuals':
+            result[i] = ref - ours
+        else:
+            raise RuntimeError('Invalid type "' + which + '"')
+               
+    return result
 
-    return torch.from_numpy(np.array(our_frames)), \
-            torch.from_numpy(np.array(ref_frames)), \
-            torch.from_numpy(np.array(residuals))
+def load(output_path, which):
+    with open(output_path + '/' + which +'.npy', 'rb') as f:
+        return np.load(f)
+
+if __name__ == '__main__':
+    if len(sys.argv) != 5:
+        print('Expected arguments: <ref images folder> <compressed images folder> <output data folder> <which>')
+        exit()
+
+    ref_path, compressed_path, output_path, which = sys.argv[1:]
+    result = calc(ref_path, compressed_path, which)
+
+    with open(output_path + '/' + which + '.npy', 'wb') as f:
+        np.save(f, result)
+    
