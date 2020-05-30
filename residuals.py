@@ -15,7 +15,7 @@ def calc(ref_path, image_path, which):
     
     for i, curr_path in enumerate(paths):
         if i % 100 == 0:
-            print('Saving', which, 'image', i)
+            print('Loading', which, 'image', i)
             
         file_name = os.path.basename(curr_path)
 
@@ -56,6 +56,16 @@ if __name__ == '__main__':
     ref_path, compressed_path, output_path, which = sys.argv[1:]
     result = calc(ref_path, compressed_path, which)
 
-    with open(output_path + '/' + which + '.npy', 'wb') as f:
-        np.save(f, result)
+    np.random.seed(348)
+    rand = np.random.rand(len(result))
+    # print(rand)
+    train_keys = rand <= 0.8
+    test_keys = rand > 0.8
+        
+    with open(output_path + '/' + which + '_train.npy', 'wb') as f:
+        np.save(f, result[train_keys])
+
+    with open(output_path + '/' + which + '_test.npy', 'wb') as f:
+        np.save(f, result[test_keys])
+    
     

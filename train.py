@@ -17,7 +17,7 @@ batch_size = 10
 learning_rate = 1e-3
 
 # Load Data
-resids = torch.from_numpy(residuals.load(data_path, 'residuals')).float()
+resids = torch.from_numpy(residuals.load(data_path, 'residuals_train')).float()
 data_loader = DataLoader(resids, batch_size=batch_size, shuffle=True)
 N, C_in, H_in, W_in = resids.shape
 
