@@ -6,6 +6,7 @@ def encode(data, fps=10):
     assert len(data.shape) == 4
     num_frames = data.shape[0]
     flattened = torch.flatten(data).sign()
+    print(flattened.shape)
     flattened[flattened == 0] = 1
     data = flattened.int().tolist()
 

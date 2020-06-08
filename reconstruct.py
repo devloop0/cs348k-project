@@ -66,6 +66,10 @@ for i in range(len(resids)):
     _, _, added_bitrate = huffman.encode(encoded, fps=int(args['fps']))
     total_added_bitrate += added_bitrate
 
+    # Binarize
+    encoded = encoded.sign()
+    encoded[encoded == 0] = 1
+
     # Decode
     decoded = model.decoder(encoded)
     decoded = decoded.data.numpy()
@@ -73,8 +77,8 @@ for i in range(len(resids)):
     save_img(i, compressed[i] + decoded[0], 'result')
     save_img(i, compressed[i], 'compressed')
     save_img(i, compressed[i] + resids[i], 'reference')    
-    save_img(i, resids[i], 'input', resid=True)
-    save_img(i, decoded[0], 'output', resid=True) 
+    #save_img(i, resids[i], 'input', resid=True)
+    #save_img(i, decoded[0], 'output', resid=True) 
 
 avg_added_bitrate = total_added_bitrate / len(resids)
 with open(os.path.join(output_path, 'avg_added_bitrate.txt'), 'w') as f:
